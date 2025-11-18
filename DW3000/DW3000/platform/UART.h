@@ -13,7 +13,7 @@
 void uart_init(void);
 void UART_putc(char data);
 void UART_puts(char* s);
-FILE uart_str;
+extern FILE uart_str;
 
 #endif /* UART_H_ */
 

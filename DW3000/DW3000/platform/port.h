@@ -27,6 +27,8 @@
 #define TRUE	1
 #endif
 
+
+
 void sleepms(uint32_t x);
 int sleepus(uint32_t x);
 void deca_sleep(uint8_t time_ms);
@@ -39,7 +41,7 @@ int writetospi(uint16_t headerLength,  uint8_t *headerBuffer, uint16_t bodyLengt
 void port_set_dw_ic_spi_slowrate(void);
 void port_set_dw_ic_spi_fastrate(void);
 void reset_DWIC(void);
-int spi_tranceiver (uint8_t *data);
+uint8_t spi_tranceiver (uint8_t *data);
 
 #endif /* PORT_H_ */
 

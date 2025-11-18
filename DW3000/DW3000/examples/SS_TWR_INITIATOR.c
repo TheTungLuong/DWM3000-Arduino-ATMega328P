@@ -13,6 +13,7 @@
 #include "shared_defines.h"
 #include "shared_functions.h"
 #include "config_options.h"
+#include "string.h"
 
 /* Example application name and version to display on LCD screen. */
 #define APP_NAME "DS TWR INIT v1.0"

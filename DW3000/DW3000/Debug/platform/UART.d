@@ -1,5 +1,4 @@
-examples/SS_TWR_INITIATOR.d examples/SS_TWR_INITIATOR.o: \
- ../examples/SS_TWR_INITIATOR.c ../examples/SS_TWR_INITIATOR.h \
+platform/UART.d platform/UART.o: ../platform/UART.c ../platform/UART.h \
  ../include/main.h \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\sfr_defs.h \
@@ -22,12 +21,9 @@ examples/SS_TWR_INITIATOR.d examples/SS_TWR_INITIATOR.o: \
  ../platform/UART.h ../platform/port.h ../driver/deca_device_api.h \
  ../driver/deca_types.h ../include/shared_functions.h \
  ../driver/deca_types.h ../driver/deca_regs.h ../driver/deca_vals.h \
- ../include/shared_defines.h ../include/config_options.h \
- ../include/shared_defines.h ../include/shared_functions.h \
- ../include/config_options.h \
- d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h
+ ../include/shared_defines.h ../include/config_options.h
 
-../examples/SS_TWR_INITIATOR.h:
+../platform/UART.h:
 
 ../include/main.h:
 
@@ -86,11 +82,3 @@ d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolch
 ../include/shared_defines.h:
 
 ../include/config_options.h:
-
-../include/shared_defines.h:
-
-../include/shared_functions.h:
-
-../include/config_options.h:
-
-d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h:

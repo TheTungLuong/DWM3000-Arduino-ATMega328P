@@ -1,6 +1,7 @@
-examples/SS_TWR_INITIATOR.d examples/SS_TWR_INITIATOR.o: \
- ../examples/SS_TWR_INITIATOR.c ../examples/SS_TWR_INITIATOR.h \
- ../include/main.h \
+src/ASF/mega/boards/atmega328pb_xplained_mini/init.d \
+ src/ASF/mega/boards/atmega328pb_xplained_mini/init.o: \
+ ../src/ASF/mega/boards/atmega328pb_xplained_mini/init.c \
+ ../src/ASF/common/boards/board.h ../src/ASF/mega/utils/compiler.h \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\sfr_defs.h \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\inttypes.h \
@@ -12,24 +13,25 @@ examples/SS_TWR_INITIATOR.d examples/SS_TWR_INITIATOR.o: \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\version.h \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\fuse.h \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\lock.h \
- d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h \
- d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay_basic.h \
- d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\math.h \
- d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\setbaud.h \
- d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdio.h \
- d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stdarg.h \
+ d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stdbool.h \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stddef.h \
- ../platform/UART.h ../platform/port.h ../driver/deca_device_api.h \
- ../driver/deca_types.h ../include/shared_functions.h \
- ../driver/deca_types.h ../driver/deca_regs.h ../driver/deca_vals.h \
- ../include/shared_defines.h ../include/config_options.h \
- ../include/shared_defines.h ../include/shared_functions.h \
- ../include/config_options.h \
- d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h
+ d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h \
+ ../src/ASF/common/utils/parts.h ../src/ASF/common/utils/interrupt.h \
+ ../src/ASF/common/utils/interrupt/interrupt_avr8.h \
+ d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\interrupt.h \
+ ../src/ASF/mega/utils/progmem.h \
+ d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\pgmspace.h \
+ ../src/ASF/mega/boards/atmega328pb_xplained_mini/atmega328pb_xplained_mini.h \
+ ../src/ASF/mega/boards/atmega328pb_xplained_mini/led.h \
+ ../src/ASF/common/services/gpio/gpio.h \
+ ../src/ASF/common/services/gpio/mega_gpio/mega_gpio.h \
+ ../src/ASF/common/services/ioport/ioport.h \
+ ../src/ASF/common/services/ioport/mega/ioport.h \
+ ../src/config/conf_board.h
 
-../examples/SS_TWR_INITIATOR.h:
+../src/ASF/common/boards/board.h:
 
-../include/main.h:
+../src/ASF/mega/utils/compiler.h:
 
 d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h:
 
@@ -53,44 +55,34 @@ d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolch
 
 d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\lock.h:
 
-d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay.h:
-
-d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\delay_basic.h:
-
-d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\math.h:
-
-d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\util\setbaud.h:
-
-d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdio.h:
-
-d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stdarg.h:
+d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stdbool.h:
 
 d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stddef.h:
 
-../platform/UART.h:
+d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\stdlib.h:
 
-../platform/port.h:
+../src/ASF/common/utils/parts.h:
 
-../driver/deca_device_api.h:
+../src/ASF/common/utils/interrupt.h:
 
-../driver/deca_types.h:
+../src/ASF/common/utils/interrupt/interrupt_avr8.h:
 
-../include/shared_functions.h:
+d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\interrupt.h:
 
-../driver/deca_types.h:
+../src/ASF/mega/utils/progmem.h:
 
-../driver/deca_regs.h:
+d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\pgmspace.h:
 
-../driver/deca_vals.h:
+../src/ASF/mega/boards/atmega328pb_xplained_mini/atmega328pb_xplained_mini.h:
 
-../include/shared_defines.h:
+../src/ASF/mega/boards/atmega328pb_xplained_mini/led.h:
 
-../include/config_options.h:
+../src/ASF/common/services/gpio/gpio.h:
 
-../include/shared_defines.h:
+../src/ASF/common/services/gpio/mega_gpio/mega_gpio.h:
 
-../include/shared_functions.h:
+../src/ASF/common/services/ioport/ioport.h:
 
-../include/config_options.h:
+../src/ASF/common/services/ioport/mega/ioport.h:
 
-d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h:
+../src/config/conf_board.h:

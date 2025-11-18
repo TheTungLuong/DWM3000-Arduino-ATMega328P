@@ -24,5 +24,3 @@ platform\UART.c
 
 src\ASF\mega\boards\atmega328pb_xplained_mini\init.c
 
-src\main.c
-

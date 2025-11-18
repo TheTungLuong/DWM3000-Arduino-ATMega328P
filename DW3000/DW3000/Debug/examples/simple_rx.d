@@ -22,7 +22,8 @@ examples/simple_rx.d examples/simple_rx.o: ../examples/simple_rx.c \
  ../driver/deca_types.h ../include/shared_functions.h \
  ../driver/deca_types.h ../driver/deca_regs.h ../driver/deca_vals.h \
  ../include/shared_defines.h ../include/config_options.h \
- ../include/config_options.h
+ ../include/config_options.h \
+ d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h
 
 ../examples/simple_rx.h:
 
@@ -85,3 +86,5 @@ d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolch
 ../include/config_options.h:
 
 ../include/config_options.h:
+
+d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h:

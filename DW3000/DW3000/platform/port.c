@@ -31,8 +31,8 @@ void deca_usleep(uint8_t time_us) // wrapper for decawave sleep function
 
 void spi_init(void)
 {
-	DDR_SPI = _BV(DD_MOSI)|_BV(DD_SCK)|_BV(DD_SS); // Set MOSI, SCK and CS output
-	DDR_SPI &= ~_BV(DD_MISO); // make sure MISO is an input
+	DDR_SPI |= _BV(DD_MOSI) | _BV(DD_SCK) | _BV(DD_SS);  // set outputs
+	DDR_SPI &= ~_BV(DD_MISO);                            // keep MISO as input
 	SPCR0 = _BV(SPE)|_BV(MSTR); // Enable SPI functionality and Master SPI mode
 	SPCR0 &= ~_BV(DORD); // set SPI most significant bit first (this is default on ATMEGA328pb)
 	
@@ -48,7 +48,7 @@ void close_spi(void)
 	PORTB |= _BV(PORTB2); // set SS pin to HIGH to disable SPI
 }
 
-int spi_tranceiver (uint8_t *data) // send single byte
+uint8_t spi_tranceiver (uint8_t *data) // send single byte
 {
 	SPDR0 = data; // Load data into the buffer
 	sleepus(1);

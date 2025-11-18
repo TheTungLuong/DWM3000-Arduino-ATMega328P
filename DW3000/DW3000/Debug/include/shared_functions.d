@@ -1,5 +1,5 @@
-examples/SS_TWR_INITIATOR.d examples/SS_TWR_INITIATOR.o: \
- ../examples/SS_TWR_INITIATOR.c ../examples/SS_TWR_INITIATOR.h \
+include/shared_functions.d include/shared_functions.o: \
+ ../include/shared_functions.c ../include/shared_functions.h \
  ../include/main.h \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\io.h \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\avr\sfr_defs.h \
@@ -20,14 +20,11 @@ examples/SS_TWR_INITIATOR.d examples/SS_TWR_INITIATOR.o: \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stdarg.h \
  d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\lib\gcc\avr\5.4.0\include\stddef.h \
  ../platform/UART.h ../platform/port.h ../driver/deca_device_api.h \
- ../driver/deca_types.h ../include/shared_functions.h \
- ../driver/deca_types.h ../driver/deca_regs.h ../driver/deca_vals.h \
- ../include/shared_defines.h ../include/config_options.h \
- ../include/shared_defines.h ../include/shared_functions.h \
- ../include/config_options.h \
- d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h
+ ../driver/deca_types.h ../driver/deca_types.h ../driver/deca_regs.h \
+ ../driver/deca_vals.h ../include/shared_defines.h \
+ ../include/config_options.h
 
-../examples/SS_TWR_INITIATOR.h:
+../include/shared_functions.h:
 
 ../include/main.h:
 
@@ -75,8 +72,6 @@ d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolch
 
 ../driver/deca_types.h:
 
-../include/shared_functions.h:
-
 ../driver/deca_types.h:
 
 ../driver/deca_regs.h:
@@ -86,11 +81,3 @@ d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolch
 ../include/shared_defines.h:
 
 ../include/config_options.h:
-
-../include/shared_defines.h:
-
-../include/shared_functions.h:
-
-../include/config_options.h:
-
-d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolchain\avr\include\string.h:

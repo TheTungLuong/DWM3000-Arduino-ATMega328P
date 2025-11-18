@@ -8,6 +8,7 @@
 #include "simple_rx.h"
 #include "main.h"
 #include "config_options.h"
+#include "string.h"
 
 int simple_rx(void)
 {

@@ -23,5 +23,11 @@
 #define _BV(n) (1 << n) // sets 1 at position of BIT "n"
 #define __INLINE inline
 
+// In some common header (e.g., main.h), for ATmega328P:
+#define SPCR0 SPCR
+#define SPSR0 SPSR
+#define SPDR0 SPDR
+
+
 #endif /* MAIN_H_ */
 

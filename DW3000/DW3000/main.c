@@ -7,7 +7,7 @@
 
 #include "main.h"
 #include "config_options.h"
-
+#include "asf.h"
 #define SS_TWR_INITIATOR // the main function to be run
 
 int main(void)
@@ -15,6 +15,7 @@ int main(void)
 	uart_init(); // setup UART and enable TX and RX
 	sleepus(1); // give a microsecond so that things can print fine on serial
 	spi_init(); // setup our SPI functions
+	board_init();
 	
 	#ifdef SIMPLE_TX
 		#include "simple_tx.h"
