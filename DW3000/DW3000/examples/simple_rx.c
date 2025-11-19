@@ -9,6 +9,51 @@
 #include "main.h"
 #include "config_options.h"
 #include "string.h"
+#include <math.h>
+#include <inttypes.h>
+
+#define CIR_PRE_SAMPLES   10
+#define CIR_POST_SAMPLES  50
+#define ACCUMULATOR_MAX_SAMPLES 1024
+
+static void read_single_cir_sample(uint16_t sampleIndex, int32_t *re, int32_t *im)
+{
+        uint8_t accum_data[7];
+
+        dwt_readaccdata(accum_data, sizeof(accum_data), sampleIndex);
+
+        int32_t r = 0;
+        int32_t j = 0;
+
+        r  = accum_data[1];
+        r |= ((int32_t)accum_data[2] << 8);
+        r |= ((int32_t)(accum_data[3] & 0x03) << 16);
+
+        j  = accum_data[4];
+        j |= ((int32_t)accum_data[5] << 8);
+        j |= ((int32_t)(accum_data[6] & 0x03) << 16);
+
+        if (r & 0x020000) r |= 0xFFFC0000;
+        if (j & 0x020000) j |= 0xFFFC0000;
+
+        *re = r;
+        *im = j;
+}
+
+static void dump_cir_window(uint16_t startIdx, uint16_t endIdx)
+{
+        int32_t re = 0;
+        int32_t im = 0;
+
+        printf("FRAME_BEGIN\r\n");
+        for (uint16_t idx = startIdx; idx <= endIdx; idx++)
+        {
+                read_single_cir_sample(idx, &re, &im);
+                float magnitude = sqrtf(((float)re * (float)re) + ((float)im * (float)im));
+                printf("CIR,%" PRIu16 ",%ld,%ld,%.3f\r\n", idx, (long)re, (long)im, (double)magnitude);
+        }
+        printf("FRAME_END\r\n");
+}
 
 int simple_rx(void)
 {
@@ -34,10 +79,11 @@ int simple_rx(void)
     /* Hold copy of status register state here for reference so that it can be examined at a debug breakpoint. */
     uint32_t status_reg;
     /* Hold copy of frame length of frame received (if good) so that it can be examined at a debug breakpoint. */
-    uint16_t frame_len;	
-	
-	port_set_dw_ic_spi_slowrate();
-	dwt_softreset(); // do a soft reset with SPI due to lack of RSTn line on our board
+    uint16_t frame_len;
+    dwt_rxdiag_t diag;
+
+        port_set_dw_ic_spi_slowrate();
+        dwt_softreset(); // do a soft reset with SPI due to lack of RSTn line on our board
 	
 	sleepms(2); // Time needed for DW3000 to start up (transition from INIT_RC to IDLE_RC, or could wait for SPIRDY event)
 	
@@ -56,17 +102,19 @@ int simple_rx(void)
 	// Enabling LEDs here for debug so that for each TX the D1 LED will flash on DW3000 red eval-shield boards.
 	dwt_setleds(DWT_LEDS_ENABLE | DWT_LEDS_INIT_BLINK);
 
-	// Configure DW IC. See NOTE 5 below.
-	if(dwt_configure(&config_options)) // if the dwt_configure returns DWT_ERROR either the PLL or RX calibration has failed the host should reset the device
-	{
-		UART_puts("CONFIG FAILED\r\n");
-		return 0;
-	}
-	
-	port_set_dw_ic_spi_fastrate();
-	
-	UART_puts("CONGRATS!!! Config and Init functions complete with no errors!\r\n");
-	UART_puts("Starting main loop..\r\n");
+        // Configure DW IC. See NOTE 5 below.
+        if(dwt_configure(&config_options)) // if the dwt_configure returns DWT_ERROR either the PLL or RX calibration has failed the host should reset the device
+        {
+                UART_puts("CONFIG FAILED\r\n");
+                return 0;
+        }
+
+        dwt_configciadiag(DW_CIA_DIAG_LOG_ALL);
+
+        port_set_dw_ic_spi_fastrate();
+
+        UART_puts("CONGRATS!!! Config and Init functions complete with no errors!\r\n");
+        UART_puts("Starting main loop..\r\n");
 		
 	// Loop forever sending frames periodically.
     while (1)
@@ -96,6 +144,17 @@ int simple_rx(void)
             {
                 dwt_readrxdata(rx_buffer, frame_len-FCS_LEN, 0); /* No need to read the FCS/CRC. */
             }
+
+            dwt_readdiagnostics(&diag);
+            uint16_t fpi = diag.ipatovFpIndex;
+            uint16_t start_idx = (fpi > CIR_PRE_SAMPLES) ? (fpi - CIR_PRE_SAMPLES) : 0;
+            uint16_t end_idx = fpi + CIR_POST_SAMPLES;
+            if (end_idx >= ACCUMULATOR_MAX_SAMPLES)
+            {
+                end_idx = ACCUMULATOR_MAX_SAMPLES - 1;
+            }
+
+            dump_cir_window(start_idx, end_idx);
 
             /* Clear good RX frame event in the DW IC status register. */
             dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
