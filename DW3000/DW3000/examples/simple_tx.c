@@ -23,8 +23,8 @@ int simple_tx(void)
 
 	#define FRAME_LENGTH    (sizeof(tx_msg)+FCS_LEN) // The real length that is going to be transmitted
 
-	// Inter-frame delay period, in milliseconds.
-	#define TX_DELAY_MS 2000
+        // Inter-frame delay period, in milliseconds.
+        #define TX_DELAY_MS 500
 
 	#define OTP_ADDRESS     0x50 // Address to write - OTP
 	#define OTP_DATA        0x87654321 // Data to write - OTP
@@ -91,8 +91,7 @@ int simple_tx(void)
 		// Clear TX frame sent event. 
 		dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
 
-		UART_puts("TX Frame Sent..");
-		UART_puts("\r\n");
+                printf("TX: frame %u sent\r\n", tx_msg[BLINK_FRAME_SN_IDX]);
 
 		// Execute a delay between transmissions. 
 		sleepms(TX_DELAY_MS);
