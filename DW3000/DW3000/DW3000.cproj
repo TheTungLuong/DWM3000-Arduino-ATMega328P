@@ -241,9 +241,6 @@
     <Compile Include="examples\SS_TWR_RESPONDER.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="examples\SS_TWR_RESPONDER.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="examples\SS_TWR_INITIATOR.h">
       <SubType>compile</SubType>
     </Compile>
@@ -260,6 +257,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="examples\simple_tx.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="examples\SS_TWR_RESPONDER.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="include\config_options.c">

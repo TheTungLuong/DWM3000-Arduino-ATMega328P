@@ -3,39 +3,88 @@
  *
  * Created: 9/17/2021 4:45:01 PM
  *  Author: Emin Eminof
- */ 
-
+ */
 #include "simple_rx.h"
 #include "main.h"
 #include "config_options.h"
 #include "string.h"
+#include "math.h"
+#include "inttypes.h"
+
+#define CIR_PRE_SAMPLES   10
+#define CIR_POST_SAMPLES  50
+#define ACCUMULATOR_MAX_SAMPLES 1024
+
+static void dump_cir_window(uint16_t startIdx, uint16_t endIdx);
+static void log_cir_window(const dwt_rxdiag_t *diag);
+
+static void read_single_cir_sample(uint16_t sampleIndex, int32_t *re, int32_t *im)
+{
+	uint8_t accum_data[7];
+
+	dwt_readaccdata(accum_data, sizeof(accum_data), sampleIndex);
+
+	int32_t r = 0;
+	int32_t j = 0;
+
+	r  = accum_data[1];
+	r |= ((int32_t)accum_data[2] << 8);
+	r |= ((int32_t)(accum_data[3] & 0x03) << 16);
+
+	j  = accum_data[4];
+	j |= ((int32_t)accum_data[5] << 8);
+	j |= ((int32_t)(accum_data[6] & 0x03) << 16);
+
+	if (r & 0x020000) r |= 0xFFFC0000;
+	if (j & 0x020000) j |= 0xFFFC0000;
+
+	*re = r;
+	*im = j;
+}
+
+static void log_cir_window(const dwt_rxdiag_t *diag)
+{
+	uint16_t fpi = diag->ipatovFpIndex;
+	if (fpi >= ACCUMULATOR_MAX_SAMPLES)
+	{
+		fpi = 0;
+	}
+
+	uint16_t start_idx = (fpi > CIR_PRE_SAMPLES) ? (fpi - CIR_PRE_SAMPLES) : 0;
+	uint16_t end_idx = fpi + CIR_POST_SAMPLES;
+	if (end_idx >= ACCUMULATOR_MAX_SAMPLES)
+	{
+		end_idx = ACCUMULATOR_MAX_SAMPLES - 1;
+	}
+
+	printf("CIR_META,FP=%" PRIu16 ",START=%" PRIu16 ",END=%" PRIu16 "\r\n", fpi, start_idx, end_idx);
+	dump_cir_window(start_idx, end_idx);
+}
+
+static void dump_cir_window(uint16_t startIdx, uint16_t endIdx)
+{
+	int32_t re = 0;
+	int32_t im = 0;
+
+	printf("FRAME_BEGIN\r\n");
+	for (uint16_t idx = startIdx; idx <= endIdx; idx++)
+	{
+		read_single_cir_sample(idx, &re, &im);
+		float magnitude = sqrtf(((float)re * (float)re) + ((float)im * (float)im));
+		printf("CIR,%" PRIu16 ",%ld,%ld,%.3f\r\n", idx, (long)re, (long)im, (double)magnitude);
+	}
+	printf("FRAME_END\r\n");
+}
 
 int simple_rx(void)
 {
-	/* Default communication configuration. We use default non-STS DW mode. */
-	static dwt_config_t config = {
-		5,               /* Channel number. */
-		DWT_PLEN_128,    /* Preamble length. Used in TX only. */
-		DWT_PAC8,        /* Preamble acquisition chunk size. Used in RX only. */
-		9,               /* TX preamble code. Used in TX only. */
-		9,               /* RX preamble code. Used in RX only. */
-		1,               /* 0 to use standard 8 symbol SFD, 1 to use non-standard 8 symbol, 2 for non-standard 16 symbol SFD and 3 for 4z 8 symbol SDF type */
-		DWT_BR_6M8,      /* Data rate. */
-		DWT_PHRMODE_STD, /* PHY header mode. */
-		DWT_PHRRATE_STD, /* PHY header rate. */
-		(129 + 8 - 8),   /* SFD timeout (preamble length + 1 + SFD length - PAC size). Used in RX only. */
-		DWT_STS_MODE_OFF, /* STS disabled */
-		DWT_STS_LEN_64,  /* STS length see allowed values in Enum dwt_sts_lengths_e */
-		DWT_PDOA_M0      /* PDOA mode off */
-	};
-
 	/* Buffer to store received frame. See NOTE 1 below. */
 	static uint8_t rx_buffer[FRAME_LEN_MAX];
     /* Hold copy of status register state here for reference so that it can be examined at a debug breakpoint. */
     uint32_t status_reg;
     /* Hold copy of frame length of frame received (if good) so that it can be examined at a debug breakpoint. */
     uint16_t frame_len;	
-	
+	dwt_rxdiag_t diag;
 	port_set_dw_ic_spi_slowrate();
 	dwt_softreset(); // do a soft reset with SPI due to lack of RSTn line on our board
 	
@@ -63,6 +112,8 @@ int simple_rx(void)
 		return 0;
 	}
 	
+	/* Enable CIA diagnostics so the accumulator (CIR) and first-path index can be read. */
+	dwt_configciadiag(DW_CIA_DIAG_LOG_ALL);
 	port_set_dw_ic_spi_fastrate();
 	
 	UART_puts("CONGRATS!!! Config and Init functions complete with no errors!\r\n");
@@ -94,8 +145,11 @@ int simple_rx(void)
             frame_len = dwt_read32bitreg(RX_FINFO_ID) & RX_FINFO_RXFLEN_BIT_MASK;
             if (frame_len <= FRAME_LEN_MAX)
             {
-                dwt_readrxdata(rx_buffer, frame_len-FCS_LEN, 0); /* No need to read the FCS/CRC. */
+				dwt_readrxdata(rx_buffer, frame_len-FCS_LEN, 0); /* No need to read the FCS/CRC. */
             }
+			
+			dwt_readdiagnostics(&diag);
+			log_cir_window(&diag);
 
             /* Clear good RX frame event in the DW IC status register. */
             dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
@@ -110,4 +164,3 @@ int simple_rx(void)
         }
     }
 }
-

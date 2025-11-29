@@ -8,16 +8,26 @@
 #include "main.h"
 #include "config_options.h"
 #include "asf.h"
-#define SS_TWR_INITIATOR // the main function to be run
+
+//#define SIMPLE_TX
+//#define SIMPLE_RX
+//#define SS_TWR_INITIATOR // the main function to be run
+//#define SS_TWR_RESPONDER
+#include "simple_rx.h"
+#include "simple_tx.h"
 
 int main(void)
 {	
 	uart_init(); // setup UART and enable TX and RX
 	sleepus(1); // give a microsecond so that things can print fine on serial
 	spi_init(); // setup our SPI functions
-	board_init();
 	
-	#ifdef SIMPLE_TX
+	
+	
+	//simple_rx();
+	simple_tx();
+
+	/*#ifdef SIMPLE_TX
 		#include "simple_tx.h"
 		simple_tx();
 	#endif
@@ -35,7 +45,9 @@ int main(void)
 	#ifdef SS_TWR_RESPONDER
 		#include "SS_TWR_RESPONDER.h"
 		ds_twr_responder();
-	#endif
-
+	#endif*/
+	
+	
+	board_init();
 }
 

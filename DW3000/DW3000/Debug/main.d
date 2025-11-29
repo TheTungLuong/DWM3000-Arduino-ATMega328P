@@ -37,7 +37,8 @@ main.d main.o: .././main.c ../include/main.h \
  ../src/ASF/common/boards/board.h \
  ../src/ASF/mega/boards/atmega328pb_xplained_mini/atmega328pb_xplained_mini.h \
  ../src/ASF/mega/boards/atmega328pb_xplained_mini/led.h \
- ../src/ASF/mega/utils/status_codes.h ../examples/SS_TWR_INITIATOR.h
+ ../src/ASF/mega/utils/status_codes.h ../examples/simple_rx.h \
+ ../examples/simple_tx.h
 
 ../include/main.h:
 
@@ -135,4 +136,6 @@ d:\tung\programme\ data\ide\microchip\ studio\7.0\toolchain\avr8\avr8-gnu-toolch
 
 ../src/ASF/mega/utils/status_codes.h:
 
-../examples/SS_TWR_INITIATOR.h:
+../examples/simple_rx.h:
+
+../examples/simple_tx.h:
