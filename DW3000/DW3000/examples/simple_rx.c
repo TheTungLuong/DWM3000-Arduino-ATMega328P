@@ -1,90 +1,114 @@
 /*
  * simple_rx.c
  *
- * Created: 9/17/2021 4:45:01 PM
- *  Author: Emin Eminof
- */
+ * Modified to read CIR and output dB magnitude to UART
+ */ 
+
 #include "simple_rx.h"
 #include "main.h"
 #include "config_options.h"
-#include "string.h"
-#include "math.h"
-#include "inttypes.h"
+#include <stdio.h>
+#include <math.h> // C?n cho hàm sqrt() và log10()
 
-#define CIR_PRE_SAMPLES   10
-#define CIR_POST_SAMPLES  50
-#define ACCUMULATOR_MAX_SAMPLES 1024
+// ??nh ngh?a ?? dài vùng nh? Accumulator c?n ??c.
+// V?i Preamble 64 ho?c 128, vùng quan tr?ng th??ng n?m trong kho?ng 800-1000 m?u ??u tiên.
+// ??c quá nhi?u s? làm ch?m quá trình nh?n gói tin ti?p theo.
+#define ACCUM_READ_LEN  900 
 
-static void dump_cir_window(uint16_t startIdx, uint16_t endIdx);
-static void log_cir_window(const dwt_rxdiag_t *diag);
-
-static void read_single_cir_sample(uint16_t sampleIndex, int32_t *re, int32_t *im)
+// Hàm h? tr? ??c và in CIR
+void read_and_print_cir(void)
 {
-	uint8_t accum_data[7];
+    uint8_t buffer[7]; // 6 byte d? li?u + 1 byte dummy ??u tiên theo quy ??nh c?a DW3000
+    int32_t real = 0;
+    int32_t imag = 0;
+    float amp = 0.0;
+    float db = 0.0;
+    char msg[64];
 
-	dwt_readaccdata(accum_data, sizeof(accum_data), sampleIndex);
+    UART_puts("--- START CIR DATA ---\r\n");
+    UART_puts("Index,Magnitude_dB\r\n");
 
-	int32_t r = 0;
-	int32_t j = 0;
+    // ??c t?ng m?u m?t ?? ti?t ki?m RAM cho ATmega328p
+    for(int i = 0; i < ACCUM_READ_LEN; i++)
+    {
+        // DW3000: M?i m?u ph?c g?m 6 byte (3 byte th?c, 3 byte ?o).
+        // Hàm dwt_readaccdata yêu c?u ?? dài ??c + 1 byte dummy ? ??u.
+        // offset = i * 6 (vì m?i m?u 6 byte)
+        // L?u ý: dwt_readaccdata trong API DW3000 có th? ?ã x? lý dummy byte bên trong tùy implementation,
+        // nh?ng theo deca_device_api.h:
+        // "Because of an internal memory access delay... the first octet output is a dummy octet."
+        
+        // ??c 6 byte d? li?u t?i v? trí m?u th? i
+        // Ta c?n ??c 7 byte vào buffer, byte ??u tiên (buffer[0]) là rác.
+        dwt_readaccdata(buffer, 7, i * 6); 
 
-	r  = accum_data[1];
-	r |= ((int32_t)accum_data[2] << 8);
-	r |= ((int32_t)(accum_data[3] & 0x03) << 16);
+        // Ghép 3 byte thành s? nguyên 18-bit cho ph?n Th?c (Real) - Little Endian
+        // buffer[1] là LSB, buffer[3] là MSB c?a ph?n Real
+        real = (int32_t)buffer[1] | ((int32_t)buffer[2] << 8) | ((int32_t)buffer[3] << 16);
+        // X? lý d?u (Sign extension) cho s? 18-bit
+        real &= 0x03FFFF; // Gi? l?i 18 bit th?p
+        if (real & 0x020000) // N?u bit th? 17 (bit d?u) là 1
+        {
+            real |= 0xFFFC0000; // M? r?ng d?u thành s? âm 32-bit
+        }
 
-	j  = accum_data[4];
-	j |= ((int32_t)accum_data[5] << 8);
-	j |= ((int32_t)(accum_data[6] & 0x03) << 16);
+        // Ghép 3 byte thành s? nguyên 18-bit cho ph?n ?o (Imaginary) - Little Endian
+        // buffer[4] là LSB, buffer[6] là MSB c?a ph?n Imag
+        imag = (int32_t)buffer[4] | ((int32_t)buffer[5] << 8) | ((int32_t)buffer[6] << 16);
+        // X? lý d?u
+        imag &= 0x03FFFF;
+        if (imag & 0x020000)
+        {
+            imag |= 0xFFFC0000;
+        }
 
-	if (r & 0x020000) r |= 0xFFFC0000;
-	if (j & 0x020000) j |= 0xFFFC0000;
+        // Tính biên ??: Magnitude = sqrt(Real^2 + Imag^2)
+        amp = sqrt((float)(real * real + imag * imag));
 
-	*re = r;
-	*im = j;
-}
+        // Tính dB: dB = 20 * log10(Magnitude)
+        // Tránh log(0)
+        if (amp > 0) {
+            db = 20.0 * log10(amp);
+        } else {
+            db = -100; // Giá tr? sàn n?u biên ?? b?ng 0
+        }
 
-static void log_cir_window(const dwt_rxdiag_t *diag)
-{
-	uint16_t fpi = diag->ipatovFpIndex;
-	if (fpi >= ACCUMULATOR_MAX_SAMPLES)
-	{
-		fpi = 0;
-	}
+        // In ra Serial theo ??nh d?ng CSV: Index, dB
+        // S? d?ng sprintf ?? format s? float (l?u ý c?u hình linker ?? h? tr? float printf n?u c?n)
+        // N?u ATmega không h? tr? in float t?t, có th? ép ki?u v? (int)db.
+        sprintf(msg, "%d,%d\r\n", i, (int)db); 
+        UART_puts(msg);
+    }
 
-	uint16_t start_idx = (fpi > CIR_PRE_SAMPLES) ? (fpi - CIR_PRE_SAMPLES) : 0;
-	uint16_t end_idx = fpi + CIR_POST_SAMPLES;
-	if (end_idx >= ACCUMULATOR_MAX_SAMPLES)
-	{
-		end_idx = ACCUMULATOR_MAX_SAMPLES - 1;
-	}
-
-	printf("CIR_META,FP=%" PRIu16 ",START=%" PRIu16 ",END=%" PRIu16 "\r\n", fpi, start_idx, end_idx);
-	dump_cir_window(start_idx, end_idx);
-}
-
-static void dump_cir_window(uint16_t startIdx, uint16_t endIdx)
-{
-	int32_t re = 0;
-	int32_t im = 0;
-
-	printf("FRAME_BEGIN\r\n");
-	for (uint16_t idx = startIdx; idx <= endIdx; idx++)
-	{
-		read_single_cir_sample(idx, &re, &im);
-		float magnitude = sqrtf(((float)re * (float)re) + ((float)im * (float)im));
-		printf("CIR,%" PRIu16 ",%ld,%ld,%.3f\r\n", idx, (long)re, (long)im, (double)magnitude);
-	}
-	printf("FRAME_END\r\n");
+    UART_puts("--- END CIR DATA ---\r\n");
 }
 
 int simple_rx(void)
 {
+	/* Default communication configuration. We use default non-STS DW mode. */
+	static dwt_config_t config = {
+		5,               /* Channel number. */
+		DWT_PLEN_128,    /* Preamble length. Used in TX only. */
+		DWT_PAC8,        /* Preamble acquisition chunk size. Used in RX only. */
+		9,               /* TX preamble code. Used in TX only. */
+		9,               /* RX preamble code. Used in RX only. */
+		1,               /* 0 to use standard 8 symbol SFD, 1 to use non-standard 8 symbol, 2 for non-standard 16 symbol SFD and 3 for 4z 8 symbol SDF type */
+		DWT_BR_6M8,      /* Data rate. */
+		DWT_PHRMODE_STD, /* PHY header mode. */
+		DWT_PHRRATE_STD, /* PHY header rate. */
+		(129 + 8 - 8),   /* SFD timeout (preamble length + 1 + SFD length - PAC size). Used in RX only. */
+		DWT_STS_MODE_OFF, /* STS disabled */
+		DWT_STS_LEN_64,  /* STS length see allowed values in Enum dwt_sts_lengths_e */
+		DWT_PDOA_M0      /* PDOA mode off */
+	};
+
 	/* Buffer to store received frame. See NOTE 1 below. */
 	static uint8_t rx_buffer[FRAME_LEN_MAX];
     /* Hold copy of status register state here for reference so that it can be examined at a debug breakpoint. */
     uint32_t status_reg;
     /* Hold copy of frame length of frame received (if good) so that it can be examined at a debug breakpoint. */
     uint16_t frame_len;	
-	dwt_rxdiag_t diag;
+	
 	port_set_dw_ic_spi_slowrate();
 	dwt_softreset(); // do a soft reset with SPI due to lack of RSTn line on our board
 	
@@ -112,8 +136,6 @@ int simple_rx(void)
 		return 0;
 	}
 	
-	/* Enable CIA diagnostics so the accumulator (CIR) and first-path index can be read. */
-	dwt_configciadiag(DW_CIA_DIAG_LOG_ALL);
 	port_set_dw_ic_spi_fastrate();
 	
 	UART_puts("CONGRATS!!! Config and Init functions complete with no errors!\r\n");
@@ -122,20 +144,13 @@ int simple_rx(void)
 	// Loop forever sending frames periodically.
     while (1)
     {
-        /* TESTING BREAKPOINT LOCATION #1 */
-
-        /* Clear local RX buffer to avoid having leftovers from previous receptions  This is not necessary but is included here to aid reading
-         * the RX buffer.
-         * This is a good place to put a breakpoint. Here (after first time through the loop) the local status register will be set for last event
-         * and if a good receive has happened the data buffer will have the data in it, and frame_len will be set to the length of the RX frame. */
+        /* Clear local RX buffer */
         memset(rx_buffer,0,sizeof(rx_buffer));
 
         /* Activate reception immediately. See NOTE 2 below. */
         dwt_rxenable(DWT_START_RX_IMMEDIATE);
 
-        /* Poll until a frame is properly received or an error/timeout occurs. See NOTE 3 below.
-         * STATUS register is 5 bytes long but, as the event we are looking at is in the first byte of the register, we can use this simplest API
-         * function to access it. */
+        /* Poll until a frame is properly received or an error/timeout occurs. */
         while (!((status_reg = dwt_read32bitreg(SYS_STATUS_ID)) & (SYS_STATUS_RXFCG_BIT_MASK | SYS_STATUS_ALL_RX_ERR )))
         { };
 
@@ -145,17 +160,19 @@ int simple_rx(void)
             frame_len = dwt_read32bitreg(RX_FINFO_ID) & RX_FINFO_RXFLEN_BIT_MASK;
             if (frame_len <= FRAME_LEN_MAX)
             {
-				dwt_readrxdata(rx_buffer, frame_len-FCS_LEN, 0); /* No need to read the FCS/CRC. */
+                dwt_readrxdata(rx_buffer, frame_len-FCS_LEN, 0); /* No need to read the FCS/CRC. */
             }
-			
-			dwt_readdiagnostics(&diag);
-			log_cir_window(&diag);
 
             /* Clear good RX frame event in the DW IC status register. */
             dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_RXFCG_BIT_MASK);
 
             UART_puts("FRAME RECEIVED\r\n");
-
+            
+            // ==========================================
+            // G?I HÀM ??C VÀ IN CIR T?I ?ÂY
+            // ==========================================
+            read_and_print_cir();
+            
         }
         else
         {
